@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xsi:schemaLocation="    
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd  
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd  
+        http://www.springframework.org/schema/data/mongo 
+        http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+        http://www.springframework.org/schema/data/repository
+ 		http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
+
+	<!-- 获取配置文件属性 -->
+	<bean id="placeholderConfig"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:db.properties</value>
+		</property>
+	</bean>
+	
+	<!-- Spring提供的mongodb操作模板-->
+	<bean id="mongoTemplate"
+		class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+	</bean>
+	
+	<!-- Default bean name is 'mongo' -->
+	<!-- 连接池配置详细查看http://api.mongodb.org/java/2.7.2/com/mongodb/MongoOptions.html#connectionsPerHost 
+	-->
+	<mongo:mongo host="${host}" port="${port}">
+		<mongo:options connections-per-host="10"
+			threads-allowed-to-block-for-connection-multiplier="10"
+			auto-connect-retry="true" />
+	</mongo:mongo>
+	
+	<!-- mongo的工厂，通过它来取得mongo实例,dbname为mongodb的数据库名，没有的话会自动创建 -->  
+    <mongo:db-factory  dbname="${dbname}" mongo-ref="mongo" /> 
+	
+    <!-- mongodb bean的仓库目录，会自动扫描扩展了MongoRepository接口的接口进行注入 -->  
+	<mongo:repositories base-package="*.dao.impl" /> 
+	
+	<context:annotation-config />
+	
+	<context:component-scan base-package="com.ebay.cs.qadb" />
+</beans>
+	
